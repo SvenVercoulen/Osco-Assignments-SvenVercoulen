@@ -1,38 +1,42 @@
+#define _GNU_SOURCE
 #include <stdio.h>
+#include <pthread.h>
+#include <stdlib.h>
+#include <unistd.h>
 
-// First approach: Using array size
-int countOccurrencesWithSize(int arr[], int size, int target) {
-    int count = 0;
-    for (int i = 0; i < size; i++) {
-        if (arr[i] == target) {
-            count++;
-        }
-    }
-    return count;
-}
+void* thread_function(void* arg) {
+    int thread_id = *(int*)arg;
 
-// Second approach: Using sentinel value (-1 as the end marker)
-int countOccurrencesWithSentinel(int arr[], int target) {
-    int count = 0;
-    int i = 0;
-    while (arr[i] != -1) {
-        if (arr[i] == target) {
-            count++;
-        }
-        i++;
-    }
-    return count;
+    // Print the thread ID using pthread_self()
+    printf("Thread ID: %lu\n", pthread_self());
+    printf("Thread %d: I will kill myself now.\n", thread_id);
+
+    // Simulate some work
+    usleep(500000); // Sleep for 0.5 seconds
+
+    // Terminate the thread
+    pthread_exit(NULL);  // Thread kills itself here
 }
 
 int main() {
-    // Test for size-based approach
-    int arr1[] = { 1, 2, 3, 4, 2, 2, 5 ,7 ,7 ,2 ,4 ,7};
-    int size = sizeof(arr1) / sizeof(arr1[0]);
-    printf("Occurrences of 2 (with size): %d\n", countOccurrencesWithSize(arr1, size, 2));
+    pthread_t threads[1000];
+    int thread_ids[1000];
 
-    // Test for sentinel-based approach
-    int arr2[] = { 1, 2, 3, 4, 2, 2, 5, -1 }; // Sentinel value -1 at the end
-    printf("Occurrences of 2 (with sentinel): %d\n", countOccurrencesWithSentinel(arr2, 2));
+    // Create 1000 threads
+    for (int i = 0; i < 1000; i++) {
+        thread_ids[i] = i + 1;
+        if (pthread_create(&threads[i], NULL, thread_function, &thread_ids[i]) != 0) {
+            perror("Failed to create thread");
+            return 1;
+        }
+
+    }
+
+    // Join all threads
+    for (int i = 0; i < 1000; i++) {
+        pthread_join(threads[i], NULL);
+        printf("Main thread: Thread %d has killed itself.\n", i + 1);
+    }
 
     return 0;
 }
