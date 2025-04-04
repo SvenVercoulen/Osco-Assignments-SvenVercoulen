@@ -49,5 +49,5 @@ int main() {
     pthread_mutex_destroy(&print_lock); 
 
     return 0;
-} // "gcc threads.c -o threads.exe -pthread" for setup
- // "./threads.exe" to run
+} // "gcc main.c -o main.exe -pthread" for setup
+ // "./main.exe" to run
